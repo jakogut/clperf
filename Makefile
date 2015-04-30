@@ -1,7 +1,7 @@
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -std=gnu99 -Wall -pipe -march=native -g
+CFLAGS = -std=gnu11 -Wall -pipe -march=native -g
 OFLAGS =
 LFLAGS = -lm -lc -lOpenCL -lpthread
 
@@ -9,10 +9,12 @@ OPTIMIZATION = -Ofast
 
 CFLAGS += $(OPTIMIZATION)
 
+OBJECTS = file.o cl_common.o
+
 all: clperf
 
-clperf: clperf.o file.o
-	$(LD) $< file.o $(LFLAGS) -o clperf
+clperf: clperf.o $(OBJECTS)
+	$(LD) $< $(OBJECTS) $(LFLAGS) -o clperf
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
