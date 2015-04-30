@@ -9,7 +9,7 @@ OPTIMIZATION = -Ofast
 
 CFLAGS += $(OPTIMIZATION)
 
-OBJECTS = file.o cl_common.o
+OBJECTS = cl_common.o
 
 all: clperf
 

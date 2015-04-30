@@ -3,6 +3,8 @@
 
 #include <CL/cl.h>
 
+#include <stdio.h>
+
 struct cl_device_properties
 {
 	char name[256];

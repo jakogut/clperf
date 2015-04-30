@@ -90,14 +90,36 @@ cl_int create_queues(struct cl_state *cl)
 	return cl->error;
 }
 
+static int cl_fcopy(char *dest, size_t size, FILE* src)
+{
+	size_t i;
+	long pos = ftell(src);
+
+	for(i = 0; i < size && !feof(src); i++) dest[i] = fgetc(src);
+	fseek(src, pos, SEEK_SET);
+
+	return 0;
+}
+
+static int cl_flength(FILE *f)
+{
+	int length;
+	long pos = ftell(f);
+
+	for(length = 0; !feof(f); length++) fgetc(f);
+	fseek(f, pos, SEEK_SET);
+
+	return length - 1;
+}
+
 cl_int build_program(struct cl_state *cl, char* fname)
 {
 	FILE* f = fopen(fname, "rb");
-	size_t src_size = clp_flength(f);
+	size_t src_size = cl_flength(f);
 	cl_uint num_src_files = 1;
 
 	char* source = calloc(src_size, sizeof(char));
-	clp_fcopy(source, src_size, f);
+	cl_fcopy(source, src_size, f);
 	fclose(f);
 
 	cl->program = clCreateProgramWithSource(cl->context, num_src_files, (const char**)&source, &src_size, &cl->error);
