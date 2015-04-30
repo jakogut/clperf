@@ -8,15 +8,13 @@
 
 #include "cl_common.h"
 
-#include "file.h"
-
 #define BUFFER_SIZE_SQRT 4096
 #define SQUARE(n) (n * n)
 
-#define NUM_ROUNDS 48
+#define ROUNDS_PER_ITERATION 48
 #define FLOPS_PER_ROUND 16
 
-#define FLOPS_PER_CYCLE (NUM_ROUNDS * FLOPS_PER_ROUND)
+#define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
 static float* rand_matrix(const size_t size_sqrt)
 {
@@ -33,7 +31,7 @@ static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 	float* res = calloc(SQUARE(BUFFER_SIZE_SQRT), sizeof(float));
 
 	const unsigned buff_size = SQUARE(BUFFER_SIZE_SQRT);
-	const unsigned round_cnt = NUM_ROUNDS;
+	const unsigned round_cnt = ROUNDS_PER_ITERATION;
 
 	for(int i = 0; i < buff_size; i++)
 	{
@@ -57,12 +55,12 @@ static unsigned timespec_to_nsec(const struct timespec* start, const struct time
 
 static void print_perf_stats(const double sec_elapsed)
 {
-	printf("%i Cycles, %i FLOP/cycle, %f sec elapsed\n%f GFLOPS\n",
+	printf("%i Cycles, %i FLOP/iteration, %f sec elapsed\n%f GFLOPS\n",
                 (int)pow(BUFFER_SIZE_SQRT, 2),
-                FLOPS_PER_CYCLE,
+                FLOPS_PER_ITERATION,
                 sec_elapsed,
                 ((pow(BUFFER_SIZE_SQRT, 2) *
-		FLOPS_PER_CYCLE) / sec_elapsed) / 1000000000.0f);
+		FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
 }
 
 void verify_result(float* a, float* b)

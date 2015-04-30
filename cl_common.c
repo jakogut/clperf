@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "file.h"
-
 void destroy_cl_state(struct cl_state *cl)
 {
 	if(cl->events)	  free(cl->events);
