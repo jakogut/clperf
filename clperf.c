@@ -28,7 +28,7 @@ static float* rand_matrix(const size_t size_sqrt)
 
 static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 {
-	float* res = calloc(SQUARE(BUFFER_SIZE_SQRT), sizeof(float));
+	float* res = aligned_alloc(16, SQUARE(BUFFER_SIZE_SQRT) * sizeof(float));
 
 	const unsigned buff_size = SQUARE(BUFFER_SIZE_SQRT);
 	const unsigned round_cnt = ROUNDS_PER_ITERATION;
