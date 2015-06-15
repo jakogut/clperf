@@ -12,7 +12,7 @@
 #define SQUARE(n) (n * n)
 
 #define ROUNDS_PER_ITERATION 48
-#define FLOPS_PER_ROUND 16
+#define FLOPS_PER_ROUND 12
 
 #define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
@@ -37,10 +37,9 @@ static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 	{
 		for(int j = 0; j < round_cnt; j++)
 		{
-			res[i] += a[i] + (b[i] * c[i]) + b[i];
-			res[i] += b[i] + (c[i] * a[i]) + c[i];
-			res[i] += c[i] + (a[i] * b[i]) + a[i];
-			res[i] += a[i] + (b[i] * c[i]) + b[i];
+			res[i] += a[i] * ((b[i] * c[i]) + b[i]);
+			res[i] += b[i] * ((c[i] * a[i]) + c[i]);
+			res[i] += c[i] * ((a[i] * b[i]) + a[i]);
 		}
 	}
 
