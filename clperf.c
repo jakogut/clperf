@@ -33,14 +33,18 @@ static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 	const unsigned buff_size = SQUARE(BUFFER_SIZE_SQRT);
 	const unsigned round_cnt = ROUNDS_PER_ITERATION;
 
+	float lres;
 	for(unsigned i = 0; i < buff_size; i++)
 	{
+		lres = 0;
 		for(unsigned j = 0; j < round_cnt; j++)
 		{
-			res[i] += a[i] * ((b[i] * c[i]) + b[i]);
-			res[i] += b[i] * ((c[i] * a[i]) + c[i]);
-			res[i] += c[i] * ((a[i] * b[i]) + a[i]);
+			lres += a[i] * ((b[i] * c[i]) + b[i]);
+			lres += b[i] * ((c[i] * a[i]) + c[i]);
+			lres += c[i] * ((a[i] * b[i]) + a[i]);
 		}
+
+		res[i] = lres;
 	}
 
 	return res;
@@ -161,8 +165,12 @@ int main()
 	print_perf_stats(sec_elapsed_cpu);
 
 	free(a_h);
+	free(a_d);
 	free(b_h);
+	free(b_d);
 	free(c_h);
+	free(c_d);
+	free(res_d);
 	free(device_result);
 	free(cpu_result);
 
