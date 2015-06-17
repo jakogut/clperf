@@ -1,7 +1,7 @@
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -std=gnu11 -Wall -pipe -march=native -g
+CFLAGS = -std=gnu11 -Wall -Wextra -Werror -pedantic -pipe -march=native -g
 OFLAGS =
 LFLAGS = -lm -lc -lOpenCL -lpthread
 
