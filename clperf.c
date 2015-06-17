@@ -33,9 +33,9 @@ static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 	const unsigned buff_size = SQUARE(BUFFER_SIZE_SQRT);
 	const unsigned round_cnt = ROUNDS_PER_ITERATION;
 
-	for(int i = 0; i < buff_size; i++)
+	for(unsigned i = 0; i < buff_size; i++)
 	{
-		for(int j = 0; j < round_cnt; j++)
+		for(unsigned j = 0; j < round_cnt; j++)
 		{
 			res[i] += a[i] * ((b[i] * c[i]) + b[i]);
 			res[i] += b[i] * ((c[i] * a[i]) + c[i]);
@@ -64,7 +64,7 @@ static void print_perf_stats(const double sec_elapsed)
 
 void verify_result(float* a, float* b)
 {
-	for(int i = 0; i < SQUARE(BUFFER_SIZE_SQRT); i++) {
+	for(unsigned i = 0; i < SQUARE(BUFFER_SIZE_SQRT); i++) {
 		float ferror_pct = 100.0 / a[i] * fabs(b[i] - a[i]);
 		if(ferror_pct > 5) {
 			printf("Results failed verification at index %i with %f pct deviation\n\n", i, ferror_pct);
@@ -99,7 +99,7 @@ int main()
 	cl_mem *c_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 	cl_mem *res_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, nelements * sizeof(float), a_h, &cl.error);
 		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, nelements * sizeof(float), b_h, &cl.error);
 		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, nelements * sizeof(float), c_h, &cl.error);
@@ -109,7 +109,7 @@ int main()
 	if(cl.error != CL_SUCCESS)
 		printf("Failed to create device buffers with %s\n", cl_errno_str(cl.error));
 
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		cl.error =  clSetKernelArg(cl.kernels[i], 0, sizeof(cl_mem), &a_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 1, sizeof(cl_mem), &b_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 2, sizeof(cl_mem), &c_d[i]);
@@ -126,7 +126,7 @@ int main()
 	float* cpu_result = cpu_result_matrix(a_h, b_h, c_h);
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		const size_t local_ws = cl.dev_props[i].max_work_group_size;
 		const size_t global_ws = nelements + (nelements % local_ws);
 
@@ -135,7 +135,7 @@ int main()
 	}
 
 	float* device_result = calloc(nelements, sizeof(float));
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
 
 		cl_ulong time_start, time_end;

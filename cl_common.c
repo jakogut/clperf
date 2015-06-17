@@ -49,7 +49,7 @@ cl_int populate_devices(struct cl_state* cl)
 	}
 
 	cl->dev_props = calloc(cl->dev_cnt, sizeof(struct cl_device_properties));
-	for(int i = 0; i < cl->dev_cnt; i++) {
+	for(unsigned i = 0; i < cl->dev_cnt; i++) {
 		clGetDeviceInfo(cl->devices[i], CL_DEVICE_NAME, 256, cl->dev_props[i].name, NULL);
 		clGetDeviceInfo(cl->devices[i], CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t),
 				&cl->dev_props[i].max_work_group_size, NULL);
@@ -73,7 +73,7 @@ cl_int create_queues(struct cl_state *cl)
 {
 	cl->queues = calloc(cl->dev_cnt, sizeof(cl_command_queue));
 
-	for(int i = 0; i < cl->dev_cnt; i++) {
+	for(unsigned i = 0; i < cl->dev_cnt; i++) {
 		cl->queues[i] = clCreateCommandQueue(cl->context, cl->devices[i],
 						     CL_QUEUE_PROFILING_ENABLE, &cl->error);
 		if(cl->error != CL_SUCCESS) {
@@ -150,7 +150,7 @@ cl_int create_kernels(struct cl_state *cl, char* kname)
 {
 	cl->kernels = calloc(cl->dev_cnt, sizeof(cl_kernel));
 
-	for(int i = 0; i < cl->dev_cnt; i++) {
+	for(unsigned i = 0; i < cl->dev_cnt; i++) {
 		cl->kernels[i] = clCreateKernel(cl->program, kname, &cl->error);
 		if(cl->error != CL_SUCCESS) printf("ERROR: Failed to create kernel.\n");
 	}
