@@ -25,7 +25,7 @@ static float* rand_matrix(const size_t size)
 	return mat;
 }
 
-struct cpu_res_arg { int tid; int tn; const float* a; const float* b; const float* c; float* ret; };
+struct cpu_res_arg { unsigned tid; unsigned tn; const float* a; const float* b; const float* c; float* ret; };
 
 void* cpu_result_matrix_mt(void* v_arg)
 {
@@ -40,12 +40,12 @@ void* cpu_result_matrix_mt(void* v_arg)
 	const unsigned work_end = work_start + work_size;
 
 	float lres;
-	for(int i = work_start; i < work_end; i++) {
+	for(unsigned i = work_start; i < work_end; i++) {
 
 		lres = 0;
 		float a = arg->a[i], b = arg->b[i], c = arg->c[i];
 
-		for(int j = 0; j < round_cnt; j++) {
+		for(unsigned j = 0; j < round_cnt; j++) {
 			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
 			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
 			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
@@ -60,12 +60,12 @@ void* cpu_result_matrix_mt(void* v_arg)
 
 static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 {
-	const int tn = 8;
+	const unsigned tn = 8;
 	struct cpu_res_arg targ[tn];
 
 	float* res = aligned_alloc(16, BUFFER_SIZE * sizeof(float));
 
-	for(int i = 0; i < tn; i++) {
+	for(unsigned i = 0; i < tn; i++) {
 		targ[i].tid = i;
 		targ[i].tn = tn;
 		targ[i].a = a;
@@ -75,8 +75,8 @@ static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 	}
 
 	pthread_t cpu_res_t[tn];
-	for(int i = 0; i < tn; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
-	for(int i = 0; i < tn; i++) pthread_join(cpu_res_t[i], NULL);
+	for(unsigned i = 0; i < tn; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
+	for(unsigned i = 0; i < tn; i++) pthread_join(cpu_res_t[i], NULL);
 
 	return (float*)res;
 }
@@ -98,7 +98,7 @@ static void print_perf_stats(const double sec_elapsed)
 
 void verify_result(float* a, float* b)
 {
-	for(int i = 0; i < BUFFER_SIZE; i++) {
+	for(unsigned i = 0; i < BUFFER_SIZE; i++) {
 		float ferror_pct = 100.0 / a[i] * fabs(b[i] - a[i]);
 		if(ferror_pct > 5) {
 			printf("Results failed verification at index %i with %f pct deviation\n", i, ferror_pct);
@@ -132,7 +132,7 @@ int main()
 	cl_mem *c_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 	cl_mem *res_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), a_h, &cl.error);
 		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), b_h, &cl.error);
 		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), c_h, &cl.error);
@@ -143,7 +143,7 @@ int main()
 		printf("Failed to create device buffers with %s\n", cl_errno_str(cl.error));
 
 	const unsigned nelements = BUFFER_SIZE;
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		cl.error =  clSetKernelArg(cl.kernels[i], 0, sizeof(cl_mem), &a_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 1, sizeof(cl_mem), &b_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 2, sizeof(cl_mem), &c_d[i]);
@@ -160,7 +160,7 @@ int main()
 	float* cpu_result = cpu_result_matrix(a_h, b_h, c_h);
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		const size_t local_ws = cl.dev_props[i].max_work_group_size;
 		const size_t global_ws = BUFFER_SIZE + (BUFFER_SIZE % local_ws);
 
@@ -169,7 +169,7 @@ int main()
 	}
 
 	float* device_result = calloc(BUFFER_SIZE, sizeof(float));
-	for(int i = 0; i < cl.dev_cnt; i++) {
+	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
 
 		cl_ulong time_start, time_end;
@@ -195,8 +195,12 @@ int main()
 	print_perf_stats(sec_elapsed_cpu);
 
 	free(a_h);
+	free(a_d);
 	free(b_h);
+	free(b_d);
 	free(c_h);
+	free(c_d);
+	free(res_d);
 	free(device_result);
 	free(cpu_result);
 
