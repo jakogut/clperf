@@ -3,47 +3,82 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <CL/cl.h>
-
 #include "cl_common.h"
 
-#define BUFFER_SIZE_SQRT 4096
-#define SQUARE(n) (n * n)
+#define BUFFER_SIZE (2 << 20)
 
 #define ROUNDS_PER_ITERATION 48
 #define FLOPS_PER_ROUND 12
 
 #define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
-static float* rand_matrix(const size_t size_sqrt)
+static float* rand_matrix(const size_t size)
 {
-	float* mat = calloc(SQUARE(size_sqrt), sizeof(float));
+	float* mat = calloc(size, sizeof(float));
 
-	for(unsigned i = 0; i < SQUARE(size_sqrt); i++)
+	for(unsigned i = 0; i < size; i++)
 		mat[i] = rand() / (float)RAND_MAX;
 
 	return mat;
 }
 
-static float* cpu_result_matrix(const float* a, const float* b, const float* c)
+struct cpu_res_arg { int tid; int tn; const float* a; const float* b; const float* c; float* ret; };
+
+void* cpu_result_matrix_mt(void* v_arg)
 {
-	float* res = aligned_alloc(16, SQUARE(BUFFER_SIZE_SQRT) * sizeof(float));
+	struct cpu_res_arg* arg = (struct cpu_res_arg*)v_arg;
 
-	const unsigned buff_size = SQUARE(BUFFER_SIZE_SQRT);
-	const unsigned round_cnt = ROUNDS_PER_ITERATION;
+	const unsigned buff_size = BUFFER_SIZE;
+	const unsigned round_cnt = ROUNDS_PER_ITERATION / 4;
 
-	for(int i = 0; i < buff_size; i++)
-	{
-		for(int j = 0; j < round_cnt; j++)
-		{
-			res[i] += a[i] * ((b[i] * c[i]) + b[i]);
-			res[i] += b[i] * ((c[i] * a[i]) + c[i]);
-			res[i] += c[i] * ((a[i] * b[i]) + a[i]);
+	const unsigned work_size = buff_size / arg->tn;
+	const unsigned work_start = arg->tid * work_size;
+
+	const unsigned work_end = work_start + work_size;
+
+	float lres;
+	for(int i = work_start; i < work_end; i++) {
+
+		lres = 0;
+		float a = arg->a[i], b = arg->b[i], c = arg->c[i];
+
+		for(int j = 0; j < round_cnt; j++) {
+			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
+			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
+			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
+			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
 		}
+
+		arg->ret[i] = lres;
 	}
 
-	return res;
+	return NULL;
+}
+
+static float* cpu_result_matrix(const float* a, const float* b, const float* c)
+{
+	const int tn = 8;
+	struct cpu_res_arg targ[tn];
+
+	float* res = aligned_alloc(16, BUFFER_SIZE * sizeof(float));
+
+	for(int i = 0; i < tn; i++) {
+		targ[i].tid = i;
+		targ[i].tn = tn;
+		targ[i].a = a;
+		targ[i].b = b;
+		targ[i].c = c;
+		targ[i].ret = res;
+	}
+
+	pthread_t cpu_res_t[tn];
+	for(int i = 0; i < tn; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
+	for(int i = 0; i < tn; i++) pthread_join(cpu_res_t[i], NULL);
+
+	return (float*)res;
 }
 
 static unsigned timespec_to_nsec(const struct timespec* start, const struct timespec* end)
@@ -55,19 +90,19 @@ static unsigned timespec_to_nsec(const struct timespec* start, const struct time
 static void print_perf_stats(const double sec_elapsed)
 {
 	printf("%i Cycles, %i FLOP/iteration, %f sec elapsed\n%f GFLOPS\n",
-                (int)pow(BUFFER_SIZE_SQRT, 2),
+                BUFFER_SIZE,
                 FLOPS_PER_ITERATION,
                 sec_elapsed,
-                ((pow(BUFFER_SIZE_SQRT, 2) *
-		FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
+                ((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
 }
 
 void verify_result(float* a, float* b)
 {
-	for(int i = 0; i < SQUARE(BUFFER_SIZE_SQRT); i++) {
+	for(int i = 0; i < BUFFER_SIZE; i++) {
 		float ferror_pct = 100.0 / a[i] * fabs(b[i] - a[i]);
 		if(ferror_pct > 5) {
-			printf("Results failed verification at index %i with %f pct deviation\n\n", i, ferror_pct);
+			printf("Results failed verification at index %i with %f pct deviation\n", i, ferror_pct);
+			printf("Expected %f, calculated %f\n\n", a[i], b[i]);
 			return;
 		}
 	}
@@ -88,11 +123,9 @@ int main()
 	build_program(&cl, "clperf_fmadd.cl");
 	create_kernels(&cl, "matrix_fmadd");
 
-	float* a_h = rand_matrix(BUFFER_SIZE_SQRT);
-	float* b_h = rand_matrix(BUFFER_SIZE_SQRT);
-	float* c_h = rand_matrix(BUFFER_SIZE_SQRT);
-
-	const unsigned nelements = SQUARE(BUFFER_SIZE_SQRT);
+	float* a_h = rand_matrix(BUFFER_SIZE);
+	float* b_h = rand_matrix(BUFFER_SIZE);
+	float* c_h = rand_matrix(BUFFER_SIZE);
 
 	cl_mem *a_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 	cl_mem *b_d = calloc(cl.dev_cnt, sizeof(cl_mem));
@@ -100,15 +133,16 @@ int main()
 	cl_mem *res_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 
 	for(int i = 0; i < cl.dev_cnt; i++) {
-		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, nelements * sizeof(float), a_h, &cl.error);
-		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, nelements * sizeof(float), b_h, &cl.error);
-		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, nelements * sizeof(float), c_h, &cl.error);
-		res_d[i] = clCreateBuffer(cl.context, CL_MEM_WRITE_ONLY, 		       nelements * sizeof(float), NULL, &cl.error);
+		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), a_h, &cl.error);
+		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), b_h, &cl.error);
+		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), c_h, &cl.error);
+		res_d[i] = clCreateBuffer(cl.context, CL_MEM_WRITE_ONLY, 		      BUFFER_SIZE * sizeof(float), NULL, &cl.error);
 	}
 
 	if(cl.error != CL_SUCCESS)
 		printf("Failed to create device buffers with %s\n", cl_errno_str(cl.error));
 
+	const unsigned nelements = BUFFER_SIZE;
 	for(int i = 0; i < cl.dev_cnt; i++) {
 		cl.error =  clSetKernelArg(cl.kernels[i], 0, sizeof(cl_mem), &a_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 1, sizeof(cl_mem), &b_d[i]);
@@ -128,13 +162,13 @@ int main()
 
 	for(int i = 0; i < cl.dev_cnt; i++) {
 		const size_t local_ws = cl.dev_props[i].max_work_group_size;
-		const size_t global_ws = nelements + (nelements % local_ws);
+		const size_t global_ws = BUFFER_SIZE + (BUFFER_SIZE % local_ws);
 
 		cl.error = clEnqueueNDRangeKernel(cl.queues[i], cl.kernels[i], 1, NULL, &global_ws, &local_ws, 0, NULL, &cl.events[i]);
 		if(cl.error != CL_SUCCESS) printf("ERROR: Kernel failed to run on GPU. Retval: %s\n", cl_errno_str(cl.error));
 	}
 
-	float* device_result = calloc(nelements, sizeof(float));
+	float* device_result = calloc(BUFFER_SIZE, sizeof(float));
 	for(int i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
 
@@ -142,7 +176,7 @@ int main()
 		clGetEventProfilingInfo(cl.events[i], CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &time_start, NULL);
 		clGetEventProfilingInfo(cl.events[i], CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &time_end, NULL);
 
-		cl.error = clEnqueueReadBuffer(cl.queues[i], res_d[i], CL_TRUE, 0, nelements * sizeof(float),
+		cl.error = clEnqueueReadBuffer(cl.queues[i], res_d[i], CL_TRUE, 0, BUFFER_SIZE * sizeof(float),
 				       device_result, 0, NULL, NULL);
 
 		if(cl.error != CL_SUCCESS)
