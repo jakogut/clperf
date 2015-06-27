@@ -9,6 +9,7 @@
 #include <CL/cl.h>
 #include "cl_common.h"
 #include "benchmark.h"
+#include "cpu_bench.h"
 
 int main()
 {
@@ -23,9 +24,11 @@ int main()
 	build_program(&cl, "clperf_fmadd.cl");
 	create_kernels(&cl, "matrix_fmadd");
 
-	float* a_h = rand_matrix(BUFFER_SIZE);
-	float* b_h = rand_matrix(BUFFER_SIZE);
-	float* c_h = rand_matrix(BUFFER_SIZE);
+	struct bench_buf input = {
+		.a = rand_matrix(BUFFER_SIZE),
+		.b = rand_matrix(BUFFER_SIZE),
+		.c = rand_matrix(BUFFER_SIZE),
+	};
 
 	cl_mem *a_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 	cl_mem *b_d = calloc(cl.dev_cnt, sizeof(cl_mem));
@@ -33,9 +36,9 @@ int main()
 	cl_mem *res_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 
 	for(unsigned i = 0; i < cl.dev_cnt; i++) {
-		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), a_h, &cl.error);
-		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), b_h, &cl.error);
-		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), c_h, &cl.error);
+		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.a, &cl.error);
+		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.b, &cl.error);
+		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.c, &cl.error);
 		res_d[i] = clCreateBuffer(cl.context, CL_MEM_WRITE_ONLY, 		      BUFFER_SIZE * sizeof(float), NULL, &cl.error);
 	}
 
@@ -55,10 +58,11 @@ int main()
 	}
 
 	// Generate a CPU matrix for verification
-	struct timespec start, end;
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	float* cpu_result = cpu_result_matrix(a_h, b_h, c_h);
-	clock_gettime(CLOCK_MONOTONIC, &end);
+	float* cpu_result = calloc(BUFFER_SIZE, sizeof(float));
+	double cpu_bench_time = cpu_bench(&input, cpu_result);
+
+	printf("CPU results:\n");
+	print_perf_stats(cpu_bench_time);
 
 	for(unsigned i = 0; i < cl.dev_cnt; i++) {
 		const size_t local_ws = cl.dev_props[i].max_work_group_size;
@@ -90,15 +94,11 @@ int main()
 		verify_result(cpu_result, device_result);
 	}
 
-	printf("CPU: %i thread(s), native code\n", nthreads());
-	double sec_elapsed_cpu = timespec_to_nsec(&start, &end) / 1000000000.0f;
-	print_perf_stats(sec_elapsed_cpu);
-
-	free(a_h);
+	free(input.a);
 	free(a_d);
-	free(b_h);
+	free(input.b);
 	free(b_d);
-	free(c_h);
+	free(input.c);
 	free(c_d);
 	free(res_d);
 	free(device_result);
