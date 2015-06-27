@@ -42,7 +42,7 @@ int main()
 		res_d[i] = clCreateBuffer(cl.context, CL_MEM_WRITE_ONLY,		       BUFFER_SIZE * sizeof(float), NULL, &cl.error);
 	}
 
-	if(cl.error != CL_SUCCESS)
+	if (cl.error != CL_SUCCESS)
 		printf("Failed to create device buffers with %s\n", cl_errno_str(cl.error));
 
 	const unsigned nelements = BUFFER_SIZE;
@@ -53,7 +53,7 @@ int main()
 		cl.error |= clSetKernelArg(cl.kernels[i], 3, sizeof(cl_mem), &res_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 4, sizeof(unsigned), &nelements);
 
-		if(cl.error != CL_SUCCESS)
+		if (cl.error != CL_SUCCESS)
 			printf("Error while settings kernel args: %s\n", cl_errno_str(cl.error));
 	}
 
@@ -69,7 +69,7 @@ int main()
 		const size_t global_ws = BUFFER_SIZE + (BUFFER_SIZE % local_ws);
 
 		cl.error = clEnqueueNDRangeKernel(cl.queues[i], cl.kernels[i], 1, NULL, &global_ws, &local_ws, 0, NULL, &cl.events[i]);
-		if(cl.error != CL_SUCCESS) printf("ERROR: Kernel failed to run on GPU. Retval: %s\n", cl_errno_str(cl.error));
+		if (cl.error != CL_SUCCESS) printf("ERROR: Kernel failed to run on GPU. Retval: %s\n", cl_errno_str(cl.error));
 	}
 
 	float* device_result = calloc(BUFFER_SIZE, sizeof(float));
@@ -83,7 +83,7 @@ int main()
 		cl.error = clEnqueueReadBuffer(cl.queues[i], res_d[i], CL_TRUE, 0, BUFFER_SIZE * sizeof(float),
 				       device_result, 0, NULL, NULL);
 
-		if(cl.error != CL_SUCCESS)
+		if (cl.error != CL_SUCCESS)
 			printf("Copy device buffer to host failed with %s", cl_errno_str(cl.error));
 
 		// Print runtime information
