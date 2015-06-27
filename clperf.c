@@ -58,7 +58,6 @@ int main()
 			printf("Error while settings kernel args: %s\n", cl_errno_str(cl.error));
 	}
 
-	// Generate a CPU matrix for verification
 	float* cpu_result = calloc(BUFFER_SIZE, sizeof(float));
 	double cpu_bench_time = cpu_bench(&input, cpu_result);
 
@@ -89,7 +88,6 @@ int main()
 		if (cl.error != CL_SUCCESS)
 			printf("Copy device buffer to host failed with %s", cl_errno_str(cl.error));
 
-		// Print runtime information
 		printf("GPU %i: %s\n", i, cl.dev_props[i].name);
 
 		double sec_elapsed_gpu = (time_end - time_start) / 1000000000.0f;
