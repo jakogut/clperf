@@ -2,7 +2,7 @@
 #define BENCHMARK_H_
 
 #define BUFFER_SIZE (2 << 20)
-#define ROUNDS_PER_ITERATION 48
+#define ROUNDS_PER_ITERATION 64
 
 #include <time.h>
 

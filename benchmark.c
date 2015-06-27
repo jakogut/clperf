@@ -7,7 +7,6 @@
 #include "benchmark.h"
 
 #define FLOPS_PER_ROUND 12
-
 #define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
 float* rand_matrix(const size_t size)
