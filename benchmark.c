@@ -41,14 +41,16 @@ void print_perf_stats(const double sec_elapsed)
 
 void verify_result(float* a, float* b)
 {
+	float max_ferror = 0;
 	for(unsigned i = 0; i < BUFFER_SIZE; i++) {
 		float ferror_pct = 100.0 / a[i] * fabs(b[i] - a[i]);
 		if(ferror_pct > 5) {
 			printf("Results failed verification at index %i with %f pct deviation\n", i, ferror_pct);
 			printf("Expected %f, calculated %f\n\n", a[i], b[i]);
 			return;
-		}
+		} else if (ferror_pct > max_ferror)
+			max_ferror = ferror_pct;
 	}
 
-	printf("Result passed verification.\n\n");
+	printf("Result passed verification. Max ferror %f%%\n\n", max_ferror);
 }
