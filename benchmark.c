@@ -19,7 +19,7 @@ float *rand_matrix(const size_t size)
 	return mat;
 }
 
-int nthreads()
+int nthreads(void)
 {
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
