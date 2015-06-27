@@ -5,19 +5,25 @@
 
 void destroy_cl_state(struct cl_state *cl)
 {
-	if(cl->events)	  free(cl->events);
-	if(cl->queues)	  free(cl->queues);
-	if(cl->kernels)	  free(cl->kernels);
-	if(cl->dev_props) free(cl->dev_props);
-	if(cl->devices)	  free(cl->devices);
-	if(cl->platforms) free(cl->platforms);
+	if (cl->events)
+		free(cl->events);
+	if (cl->queues)
+		free(cl->queues);
+	if (cl->kernels)
+		free(cl->kernels);
+	if (cl->dev_props)
+		free(cl->dev_props);
+	if (cl->devices)
+		free(cl->devices);
+	if (cl->platforms)
+		free(cl->platforms);
 }
 
 cl_int populate_platforms(struct cl_state* cl)
 {
 	clGetPlatformIDs(0, NULL, &cl->plat_cnt);
 
-	if(!cl->plat_cnt) {
+	if (!cl->plat_cnt) {
 		printf("ERROR: %s\n", cl_errno_str(cl->error));
 		return -1;
 	}
@@ -25,7 +31,7 @@ cl_int populate_platforms(struct cl_state* cl)
 	cl->platforms = calloc(cl->plat_cnt, sizeof(cl_platform_id));
 	cl->error = clGetPlatformIDs(cl->plat_cnt, cl->platforms, NULL);
 
-	if(cl->error != CL_SUCCESS) {
+	if (cl->error != CL_SUCCESS) {
 		printf("ERROR: %s\n", cl_errno_str(cl->error));
 		return cl->error;
 	}
@@ -36,20 +42,20 @@ cl_int populate_platforms(struct cl_state* cl)
 cl_int populate_devices(struct cl_state* cl)
 {
 	clGetDeviceIDs(cl->platforms[1], CL_DEVICE_TYPE_ALL, 0, NULL, &cl->dev_cnt);
-	if(!cl->dev_cnt) {
+	if (!cl->dev_cnt) {
 		return cl->error;
 	}
 
 	cl->devices = calloc(cl->dev_cnt, sizeof(cl_device_id));
 	cl->error = clGetDeviceIDs(cl->platforms[1], CL_DEVICE_TYPE_ALL, cl->dev_cnt, cl->devices, NULL);
 
-	if(cl->error != CL_SUCCESS) {
+	if (cl->error != CL_SUCCESS) {
 		printf("ERROR: %s\n", cl_errno_str(cl->error));
 		return cl->error;
 	}
 
 	cl->dev_props = calloc(cl->dev_cnt, sizeof(struct cl_device_properties));
-	for(unsigned i = 0; i < cl->dev_cnt; i++) {
+	for (unsigned i = 0; i < cl->dev_cnt; i++) {
 		clGetDeviceInfo(cl->devices[i], CL_DEVICE_NAME, 256, cl->dev_props[i].name, NULL);
 		clGetDeviceInfo(cl->devices[i], CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t),
 				&cl->dev_props[i].max_work_group_size, NULL);
@@ -61,7 +67,7 @@ cl_int populate_devices(struct cl_state* cl)
 cl_int create_context(struct cl_state *cl)
 {
 	cl->context = clCreateContext(NULL, cl->dev_cnt, cl->devices, NULL, NULL, &cl->error);
-	if(cl->error != CL_SUCCESS) {
+	if (cl->error != CL_SUCCESS) {
 		printf("ERROR: Failed to create context with %s\n", cl_errno_str(cl->error));
 		return cl->error;
 	}
@@ -73,10 +79,10 @@ cl_int create_queues(struct cl_state *cl)
 {
 	cl->queues = calloc(cl->dev_cnt, sizeof(cl_command_queue));
 
-	for(unsigned i = 0; i < cl->dev_cnt; i++) {
+	for (unsigned i = 0; i < cl->dev_cnt; i++) {
 		cl->queues[i] = clCreateCommandQueue(cl->context, cl->devices[i],
 						     CL_QUEUE_PROFILING_ENABLE, &cl->error);
-		if(cl->error != CL_SUCCESS) {
+		if (cl->error != CL_SUCCESS) {
 			printf("Failed to create command queue with error %s\n",
 			       cl_errno_str(cl->error));
 
@@ -93,7 +99,8 @@ static int cl_fcopy(char *dest, size_t size, FILE* src)
 	size_t i;
 	long pos = ftell(src);
 
-	for(i = 0; i < size && !feof(src); i++) dest[i] = fgetc(src);
+	for (i = 0; i < size && !feof(src); i++)
+		dest[i] = fgetc(src);
 	fseek(src, pos, SEEK_SET);
 
 	return 0;
@@ -104,7 +111,7 @@ static int cl_flength(FILE *f)
 	int length;
 	long pos = ftell(f);
 
-	for(length = 0; !feof(f); length++) fgetc(f);
+	for (length = 0; !feof(f); length++) fgetc(f);
 	fseek(f, pos, SEEK_SET);
 
 	return length - 1;
@@ -122,7 +129,7 @@ cl_int build_program(struct cl_state *cl, char* fname)
 
 	cl->program = clCreateProgramWithSource(cl->context, num_src_files, (const char**)&source, &src_size, &cl->error);
 
-	if(cl->error != CL_SUCCESS) {
+	if (cl->error != CL_SUCCESS) {
 		printf("ERROR: Failed to create program with %s\n", cl_errno_str(cl->error));
 		return cl->error;
 	}
@@ -130,7 +137,7 @@ cl_int build_program(struct cl_state *cl, char* fname)
 	free(source);
 
 	cl->error = clBuildProgram(cl->program, cl->dev_cnt, cl->devices, NULL, NULL, NULL);
-	if(cl->error != CL_SUCCESS) {
+	if (cl->error != CL_SUCCESS) {
 		printf("ERROR: Failed building program with %s\n", cl_errno_str(cl->error));
 
 /*		char* build_log;
@@ -150,16 +157,17 @@ cl_int create_kernels(struct cl_state *cl, char* kname)
 {
 	cl->kernels = calloc(cl->dev_cnt, sizeof(cl_kernel));
 
-	for(unsigned i = 0; i < cl->dev_cnt; i++) {
+	for (unsigned i = 0; i < cl->dev_cnt; i++) {
 		cl->kernels[i] = clCreateKernel(cl->program, kname, &cl->error);
-		if(cl->error != CL_SUCCESS) printf("ERROR: Failed to create kernel.\n");
+		if (cl->error != CL_SUCCESS) printf("ERROR: Failed to create kernel.\n");
 	}
 
 	return cl->error;
 }
 
-const char *cl_errno_str(cl_int err){
-	switch(err){
+const char *cl_errno_str(cl_int err)
+{
+	switch (err) {
 	case 0: return "CL_SUCCESS";
 	case -1: return "CL_DEVICE_NOT_FOUND";
 	case -2: return "CL_DEVICE_NOT_AVAILABLE";
