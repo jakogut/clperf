@@ -69,7 +69,8 @@ int main(void)
 		const size_t global_ws = BUFFER_SIZE + (BUFFER_SIZE % local_ws);
 
 		cl.error = clEnqueueNDRangeKernel(cl.queues[i], cl.kernels[i], 1, NULL, &global_ws, &local_ws, 0, NULL, &cl.events[i]);
-		if (cl.error != CL_SUCCESS) printf("ERROR: Kernel failed to run on GPU. Retval: %s\n", cl_errno_str(cl.error));
+		if (cl.error != CL_SUCCESS)
+			printf("ERROR: Kernel failed to run on GPU. Retval: %s\n", cl_errno_str(cl.error));
 	}
 
 	float *device_result = calloc(BUFFER_SIZE, sizeof(float));
