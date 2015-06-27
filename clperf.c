@@ -39,7 +39,7 @@ int main()
 		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.a, &cl.error);
 		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.b, &cl.error);
 		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.c, &cl.error);
-		res_d[i] = clCreateBuffer(cl.context, CL_MEM_WRITE_ONLY, 		      BUFFER_SIZE * sizeof(float), NULL, &cl.error);
+		res_d[i] = clCreateBuffer(cl.context, CL_MEM_WRITE_ONLY,		       BUFFER_SIZE * sizeof(float), NULL, &cl.error);
 	}
 
 	if(cl.error != CL_SUCCESS)
