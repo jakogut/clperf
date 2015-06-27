@@ -42,9 +42,9 @@ cl_int populate_platforms(struct cl_state *cl)
 cl_int populate_devices(struct cl_state *cl)
 {
 	clGetDeviceIDs(cl->platforms[1], CL_DEVICE_TYPE_ALL, 0, NULL, &cl->dev_cnt);
-	if (!cl->dev_cnt) {
+
+	if (!cl->dev_cnt)
 		return cl->error;
-	}
 
 	cl->devices = calloc(cl->dev_cnt, sizeof(cl_device_id));
 	cl->error = clGetDeviceIDs(cl->platforms[1], CL_DEVICE_TYPE_ALL, cl->dev_cnt, cl->devices, NULL);
