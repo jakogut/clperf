@@ -111,7 +111,9 @@ static int cl_flength(FILE *f)
 	int length;
 	long pos = ftell(f);
 
-	for (length = 0; !feof(f); length++) fgetc(f);
+	for (length = 0; !feof(f); length++)
+		fgetc(f);
+
 	fseek(f, pos, SEEK_SET);
 
 	return length - 1;
@@ -159,7 +161,8 @@ cl_int create_kernels(struct cl_state *cl, char *kname)
 
 	for (unsigned i = 0; i < cl->dev_cnt; i++) {
 		cl->kernels[i] = clCreateKernel(cl->program, kname, &cl->error);
-		if (cl->error != CL_SUCCESS) printf("ERROR: Failed to create kernel.\n");
+		if (cl->error != CL_SUCCESS)
+			printf("ERROR: Failed to create kernel.\n");
 	}
 
 	return cl->error;
