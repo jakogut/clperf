@@ -19,7 +19,7 @@ void destroy_cl_state(struct cl_state *cl)
 		free(cl->platforms);
 }
 
-cl_int populate_platforms(struct cl_state* cl)
+cl_int populate_platforms(struct cl_state *cl)
 {
 	clGetPlatformIDs(0, NULL, &cl->plat_cnt);
 
@@ -39,7 +39,7 @@ cl_int populate_platforms(struct cl_state* cl)
 	return cl->error;
 }
 
-cl_int populate_devices(struct cl_state* cl)
+cl_int populate_devices(struct cl_state *cl)
 {
 	clGetDeviceIDs(cl->platforms[1], CL_DEVICE_TYPE_ALL, 0, NULL, &cl->dev_cnt);
 	if (!cl->dev_cnt) {
@@ -94,7 +94,7 @@ cl_int create_queues(struct cl_state *cl)
 	return cl->error;
 }
 
-static int cl_fcopy(char *dest, size_t size, FILE* src)
+static int cl_fcopy(char *dest, size_t size, FILE *src)
 {
 	size_t i;
 	long pos = ftell(src);
@@ -117,17 +117,17 @@ static int cl_flength(FILE *f)
 	return length - 1;
 }
 
-cl_int build_program(struct cl_state *cl, char* fname)
+cl_int build_program(struct cl_state *cl, char *fname)
 {
-	FILE* f = fopen(fname, "rb");
+	FILE *f = fopen(fname, "rb");
 	size_t src_size = cl_flength(f);
 	cl_uint num_src_files = 1;
 
-	char* source = calloc(src_size, sizeof(char));
+	char *source = calloc(src_size, sizeof(char));
 	cl_fcopy(source, src_size, f);
 	fclose(f);
 
-	cl->program = clCreateProgramWithSource(cl->context, num_src_files, (const char**)&source, &src_size, &cl->error);
+	cl->program = clCreateProgramWithSource(cl->context, num_src_files, (const char **)&source, &src_size, &cl->error);
 
 	if (cl->error != CL_SUCCESS) {
 		printf("ERROR: Failed to create program with %s\n", cl_errno_str(cl->error));
@@ -153,7 +153,7 @@ cl_int build_program(struct cl_state *cl, char* fname)
 	return cl->error;
 }
 
-cl_int create_kernels(struct cl_state *cl, char* kname)
+cl_int create_kernels(struct cl_state *cl, char *kname)
 {
 	cl->kernels = calloc(cl->dev_cnt, sizeof(cl_kernel));
 
