@@ -15,22 +15,22 @@ struct cl_device_properties {
 };
 
 struct cl_state {
-	cl_int 		error;
+	cl_int		error;
 
-	cl_uint 	plat_cnt;
-	cl_platform_id *platforms;
+	cl_uint		plat_cnt;
+	cl_platform_id	*platforms;
 	cl_uint enabled_platforms;
 
-	cl_context 	context;
-	cl_program 	program;
+	cl_context	context;
+	cl_program	program;
 
-	cl_uint 	 dev_cnt;
-	cl_device_id 	 *devices;
+	cl_uint		dev_cnt;
+	cl_device_id	*devices;
 	struct cl_device_properties *dev_props;
 
-	cl_kernel 	 *kernels;
+	cl_kernel	*kernels;
 	cl_command_queue *queues;
-	cl_event	 *events;
+	cl_event	*events;
 };
 
 void destroy_cl_state(struct cl_state *cl);
