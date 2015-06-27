@@ -24,7 +24,8 @@ int nthreads(void)
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-unsigned timespec_to_nsec(const struct timespec *start, const struct timespec *end)
+unsigned timespec_to_nsec(const struct timespec *start,
+			  const struct timespec *end)
 {
 	return (end->tv_nsec - start->tv_nsec) +
 	      ((end->tv_sec - start->tv_sec) * 1000000000);
@@ -32,11 +33,13 @@ unsigned timespec_to_nsec(const struct timespec *start, const struct timespec *e
 
 void print_perf_stats(const double sec_elapsed)
 {
+	float gflops = ((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f;
+
 	printf("%i Cycles, %i FLOP/iteration, %f sec elapsed\n%f GFLOPS\n\n",
 		BUFFER_SIZE,
 		FLOPS_PER_ITERATION,
 		sec_elapsed,
-		((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
+		gflops);
 }
 
 void verify_result(float *a, float *b)
@@ -48,9 +51,12 @@ void verify_result(float *a, float *b)
 		float ferror_pct = 100.0 / a[i] * fabs(b[i] - a[i]);
 
 		if (ferror_pct > 5) {
-			printf("Results failed verification at index %i with %f pct deviation\n", i, ferror_pct);
+			printf("Verification failed at %i with %f pct deviation\n",
+				i, ferror_pct);
+
 			printf("Expected %f, calculated %f\n\n", a[i], b[i]);
 			return;
+
 		} else if (ferror_pct > max_ferror)
 			max_ferror = ferror_pct;
 	}
