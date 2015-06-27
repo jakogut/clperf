@@ -6,8 +6,7 @@
 
 #include <time.h>
 
-struct bench_buf
-{
+struct bench_buf {
 	float *a;
 	float *b;
 	float *c;
