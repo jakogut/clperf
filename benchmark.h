@@ -15,11 +15,12 @@ struct bench_buf
 
 int nthreads();
 
-float* rand_matrix(const size_t size);
+float *rand_matrix(const size_t size);
 
-unsigned timespec_to_nsec(const struct timespec* start, const struct timespec* end);
+unsigned timespec_to_nsec(const struct timespec *start, const struct timespec *end);
+
 void print_perf_stats(const double sec_elapsed);
 
-void verify_result(float* a, float* b);
+void verify_result(float *a, float *b);
 
 #endif
