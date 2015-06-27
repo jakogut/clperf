@@ -5,8 +5,7 @@
 
 #include <stdio.h>
 
-struct cl_device_properties
-{
+struct cl_device_properties {
 	char name[256];
 
 	cl_ulong global_mem_size;
@@ -15,8 +14,7 @@ struct cl_device_properties
 	size_t max_work_group_size;
 };
 
-struct cl_state
-{
+struct cl_state {
 	cl_int 		error;
 
 	cl_uint 	plat_cnt;
