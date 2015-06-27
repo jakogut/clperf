@@ -13,7 +13,7 @@ struct bench_buf
 	float *c;
 };
 
-int nthreads();
+int nthreads(void);
 
 float *rand_matrix(const size_t size);
 
