@@ -37,17 +37,17 @@ struct cl_state
 
 void destroy_cl_state(struct cl_state *cl);
 
-cl_int populate_platforms(struct cl_state* cl);
+cl_int populate_platforms(struct cl_state *cl);
 
-cl_int populate_devices(struct cl_state* cl);
+cl_int populate_devices(struct cl_state *cl);
 
 cl_int create_context(struct cl_state *cl);
 
 cl_int create_queues(struct cl_state *cl);
 
-cl_int build_program(struct cl_state *cl, char* fname);
+cl_int build_program(struct cl_state *cl, char *fname);
 
-cl_int create_kernels(struct cl_state *cl, char* kname);
+cl_int create_kernels(struct cl_state *cl, char *kname);
 
 const char *cl_errno_str(cl_int error);
 
