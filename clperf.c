@@ -58,7 +58,7 @@ int main()
 			printf("Error while settings kernel args: %s\n", cl_errno_str(cl.error));
 	}
 
-	float* cpu_result = calloc(BUFFER_SIZE, sizeof(float));
+	float *cpu_result = calloc(BUFFER_SIZE, sizeof(float));
 	double cpu_bench_time = cpu_bench(&input, cpu_result);
 
 	printf("CPU bench: native code, %i thread(s)\n", nthreads());
@@ -72,7 +72,7 @@ int main()
 		if (cl.error != CL_SUCCESS) printf("ERROR: Kernel failed to run on GPU. Retval: %s\n", cl_errno_str(cl.error));
 	}
 
-	float* device_result = calloc(BUFFER_SIZE, sizeof(float));
+	float *device_result = calloc(BUFFER_SIZE, sizeof(float));
 
 	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
