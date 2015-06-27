@@ -33,10 +33,10 @@ unsigned timespec_to_nsec(const struct timespec* start, const struct timespec* e
 void print_perf_stats(const double sec_elapsed)
 {
 	printf("%i Cycles, %i FLOP/iteration, %f sec elapsed\n%f GFLOPS\n\n",
-                BUFFER_SIZE,
-                FLOPS_PER_ITERATION,
-                sec_elapsed,
-                ((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
+		BUFFER_SIZE,
+		FLOPS_PER_ITERATION,
+		sec_elapsed,
+		((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
 }
 
 void verify_result(float* a, float* b)
