@@ -35,7 +35,7 @@ int main()
 	cl_mem *c_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 	cl_mem *res_d = calloc(cl.dev_cnt, sizeof(cl_mem));
 
-	for(unsigned i = 0; i < cl.dev_cnt; i++) {
+	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		a_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.a, &cl.error);
 		b_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.b, &cl.error);
 		c_d[i]   = clCreateBuffer(cl.context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, BUFFER_SIZE * sizeof(float), input.c, &cl.error);
@@ -46,7 +46,7 @@ int main()
 		printf("Failed to create device buffers with %s\n", cl_errno_str(cl.error));
 
 	const unsigned nelements = BUFFER_SIZE;
-	for(unsigned i = 0; i < cl.dev_cnt; i++) {
+	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		cl.error =  clSetKernelArg(cl.kernels[i], 0, sizeof(cl_mem), &a_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 1, sizeof(cl_mem), &b_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 2, sizeof(cl_mem), &c_d[i]);
@@ -64,7 +64,7 @@ int main()
 	printf("CPU bench: native code, %i thread(s)\n", nthreads());
 	print_perf_stats(cpu_bench_time);
 
-	for(unsigned i = 0; i < cl.dev_cnt; i++) {
+	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		const size_t local_ws = cl.dev_props[i].max_work_group_size;
 		const size_t global_ws = BUFFER_SIZE + (BUFFER_SIZE % local_ws);
 
@@ -73,7 +73,7 @@ int main()
 	}
 
 	float* device_result = calloc(BUFFER_SIZE, sizeof(float));
-	for(unsigned i = 0; i < cl.dev_cnt; i++) {
+	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
 
 		cl_ulong time_start, time_end;
