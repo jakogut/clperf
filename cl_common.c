@@ -126,6 +126,7 @@ cl_int build_program(struct cl_state *cl, char *fname)
 	cl_uint num_src_files = 1;
 
 	char *source = calloc(src_size, sizeof(char));
+
 	cl_fcopy(source, src_size, f);
 	fclose(f);
 
