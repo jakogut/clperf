@@ -46,6 +46,7 @@ int main()
 		printf("Failed to create device buffers with %s\n", cl_errno_str(cl.error));
 
 	const unsigned nelements = BUFFER_SIZE;
+
 	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		cl.error =  clSetKernelArg(cl.kernels[i], 0, sizeof(cl_mem), &a_d[i]);
 		cl.error |= clSetKernelArg(cl.kernels[i], 1, sizeof(cl_mem), &b_d[i]);
@@ -73,10 +74,12 @@ int main()
 	}
 
 	float* device_result = calloc(BUFFER_SIZE, sizeof(float));
+
 	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
 
 		cl_ulong time_start, time_end;
+
 		clGetEventProfilingInfo(cl.events[i], CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &time_start, NULL);
 		clGetEventProfilingInfo(cl.events[i], CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &time_end, NULL);
 
@@ -88,9 +91,10 @@ int main()
 
 		// Print runtime information
 		printf("GPU %i: %s\n", i, cl.dev_props[i].name);
-		double sec_elapsed_gpu = (time_end - time_start) / 1000000000.0f;
-		print_perf_stats(sec_elapsed_gpu);
 
+		double sec_elapsed_gpu = (time_end - time_start) / 1000000000.0f;
+
+		print_perf_stats(sec_elapsed_gpu);
 		verify_result(cpu_result, device_result);
 	}
 
