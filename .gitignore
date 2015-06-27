@@ -1,1 +1,3 @@
-*.o clperf
+*.o
+*.asm 
+clperf
