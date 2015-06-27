@@ -17,7 +17,8 @@ int nthreads();
 
 float *rand_matrix(const size_t size);
 
-unsigned timespec_to_nsec(const struct timespec *start, const struct timespec *end);
+unsigned timespec_to_nsec(const struct timespec *start,
+			  const struct timespec *end);
 
 void print_perf_stats(const double sec_elapsed);
 
