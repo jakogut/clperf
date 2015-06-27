@@ -4,6 +4,7 @@
 #include <time.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include <CL/cl.h>
 #include "cl_common.h"
@@ -25,7 +26,7 @@ static float* rand_matrix(const size_t size)
 	return mat;
 }
 
-struct cpu_res_arg { unsigned tid; unsigned tn; const float* a; const float* b; const float* c; float* ret; };
+struct cpu_res_arg { unsigned tid; unsigned tc; const float* a; const float* b; const float* c; float* ret; };
 
 void* cpu_result_matrix_mt(void* v_arg)
 {
@@ -34,7 +35,7 @@ void* cpu_result_matrix_mt(void* v_arg)
 	const unsigned buff_size = BUFFER_SIZE;
 	const unsigned round_cnt = ROUNDS_PER_ITERATION / 4;
 
-	const unsigned work_size = buff_size / arg->tn;
+	const unsigned work_size = buff_size / arg->tc;
 	const unsigned work_start = arg->tid * work_size;
 
 	const unsigned work_end = work_start + work_size;
@@ -58,25 +59,30 @@ void* cpu_result_matrix_mt(void* v_arg)
 	return NULL;
 }
 
+int nthreads()
+{
+	return sysconf(_SC_NPROCESSORS_ONLN);
+}
+
 static float* cpu_result_matrix(const float* a, const float* b, const float* c)
 {
-	const unsigned tn = 8;
-	struct cpu_res_arg targ[tn];
+	const unsigned tc = nthreads();
+	struct cpu_res_arg targ[tc];
 
 	float* res = aligned_alloc(16, BUFFER_SIZE * sizeof(float));
 
-	for(unsigned i = 0; i < tn; i++) {
+	for(unsigned i = 0; i < tc; i++) {
 		targ[i].tid = i;
-		targ[i].tn = tn;
+		targ[i].tc = tc;
 		targ[i].a = a;
 		targ[i].b = b;
 		targ[i].c = c;
 		targ[i].ret = res;
 	}
 
-	pthread_t cpu_res_t[tn];
-	for(unsigned i = 0; i < tn; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
-	for(unsigned i = 0; i < tn; i++) pthread_join(cpu_res_t[i], NULL);
+	pthread_t cpu_res_t[tc];
+	for(unsigned i = 0; i < tc; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
+	for(unsigned i = 0; i < tc; i++) pthread_join(cpu_res_t[i], NULL);
 
 	return (float*)res;
 }
@@ -190,7 +196,7 @@ int main()
 		verify_result(cpu_result, device_result);
 	}
 
-	printf("CPU: (single thread, native code)\n");
+	printf("CPU: %i thread(s), native code\n", nthreads());
 	double sec_elapsed_cpu = timespec_to_nsec(&start, &end) / 1000000000.0f;
 	print_perf_stats(sec_elapsed_cpu);
 
