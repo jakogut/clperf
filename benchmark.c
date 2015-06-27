@@ -9,9 +9,9 @@
 #define FLOPS_PER_ROUND 12
 #define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
-float* rand_matrix(const size_t size)
+float *rand_matrix(const size_t size)
 {
-	float* mat = calloc(size, sizeof(float));
+	float *mat = calloc(size, sizeof(float));
 
 	for(unsigned i = 0; i < size; i++)
 		mat[i] = rand() / (float)RAND_MAX;
@@ -24,7 +24,7 @@ int nthreads()
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
-unsigned timespec_to_nsec(const struct timespec* start, const struct timespec* end)
+unsigned timespec_to_nsec(const struct timespec *start, const struct timespec *end)
 {
 	return (end->tv_nsec - start->tv_nsec) +
 	      ((end->tv_sec - start->tv_sec) * 1000000000);
@@ -39,7 +39,7 @@ void print_perf_stats(const double sec_elapsed)
 		((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f);
 }
 
-void verify_result(float* a, float* b)
+void verify_result(float *a, float *b)
 {
 	float max_ferror = 0;
 	for(unsigned i = 0; i < BUFFER_SIZE; i++) {
