@@ -11,7 +11,7 @@
 #include "benchmark.h"
 #include "cpu_bench.h"
 
-int main()
+int main(void)
 {
 	struct cl_state cl;
 
