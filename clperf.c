@@ -61,7 +61,7 @@ int main()
 	float* cpu_result = calloc(BUFFER_SIZE, sizeof(float));
 	double cpu_bench_time = cpu_bench(&input, cpu_result);
 
-	printf("CPU results:\n");
+	printf("CPU bench: native code, %i thread(s)\n", nthreads());
 	print_perf_stats(cpu_bench_time);
 
 	for(unsigned i = 0; i < cl.dev_cnt; i++) {
