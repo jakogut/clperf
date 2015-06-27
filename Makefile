@@ -26,3 +26,4 @@ rebuild: clean all
 
 .PHONY : clean
 .SILENT : clean
+.NOTPARALLEL : clean
