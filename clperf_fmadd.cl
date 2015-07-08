@@ -9,10 +9,7 @@ __kernel void matrix_fmadd (__global const float* a,
 		float r = 0, al = a[i], bl = b[i], cl = c[i];
 
 		#pragma unroll
-		for(int i = 0; i < 16; i++) {
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
+		for(int i = 0; i < 512; i++) {
 			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
 		}
 

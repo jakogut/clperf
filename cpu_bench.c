@@ -25,9 +25,6 @@ static void *cpu_result_matrix_mt(void *v_arg)
 
 		for(unsigned j = 0; j < round_cnt; j++) {
 			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
-			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
-			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
-			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
 		}
 
 		arg->ret[i] = lres;

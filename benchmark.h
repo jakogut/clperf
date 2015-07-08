@@ -2,9 +2,9 @@
 #define BENCHMARK_H_
 
 #define BUFFER_SIZE (2 << 20)
-#define ROUNDS_PER_ITERATION 16
+#define ROUNDS_PER_ITERATION 512
 
-#define FLOPS_PER_ROUND 12 * 4
+#define FLOPS_PER_ROUND 4 * 3
 #define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
 #include <time.h>
