@@ -11,12 +11,11 @@ static void *cpu_result_matrix_mt(void *v_arg)
 	struct cpu_res_arg *arg = (struct cpu_res_arg *)v_arg;
 
 	const unsigned buff_size = BUFFER_SIZE;
-	const unsigned round_cnt = ROUNDS_PER_ITERATION / 4;
-
 	const unsigned work_size = buff_size / arg->tc;
 	const unsigned work_start = arg->tid * work_size;
-
 	const unsigned work_end = work_start + work_size;
+
+	const unsigned round_cnt = ROUNDS_PER_ITERATION;
 
 	float lres;
 	for(unsigned i = work_start; i < work_end; i++) {

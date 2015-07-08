@@ -3,11 +3,9 @@
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>
+#include <stdint.h>
 
 #include "benchmark.h"
-
-#define FLOPS_PER_ROUND 12
-#define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
 float *rand_matrix(const size_t size)
 {
@@ -33,7 +31,7 @@ unsigned timespec_to_nsec(const struct timespec *start,
 
 void print_perf_stats(const double sec_elapsed)
 {
-	float gflops = ((BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f;
+	float gflops = (((uint64_t)BUFFER_SIZE * FLOPS_PER_ITERATION) / sec_elapsed) / 1000000000.0f;
 
 	printf("%i Cycles, %i FLOP/iteration, %f sec elapsed\n%f GFLOPS\n\n",
 		BUFFER_SIZE,
