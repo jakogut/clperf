@@ -18,6 +18,7 @@ static void *cpu_result_matrix_mt(void *v_arg)
 	const unsigned round_cnt = ROUNDS_PER_ITERATION;
 
 	float lres;
+
 	for(unsigned i = work_start; i < work_end; i++) {
 
 		lres = 0;
@@ -48,6 +49,7 @@ static float* cpu_result_matrix(struct bench_buf *in)
 	}
 
 	pthread_t cpu_res_t[tc];
+
 	for(unsigned i = 0; i < tc; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
 	for(unsigned i = 0; i < tc; i++) pthread_join(cpu_res_t[i], NULL);
 
@@ -57,6 +59,7 @@ static float* cpu_result_matrix(struct bench_buf *in)
 double cpu_bench(struct bench_buf *in, float *result)
 {
 	struct timespec start, end;
+
 	clock_gettime(CLOCK_MONOTONIC, &start);
 	float* mat = cpu_result_matrix(in);
 	clock_gettime(CLOCK_MONOTONIC, &end);
