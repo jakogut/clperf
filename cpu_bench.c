@@ -4,7 +4,13 @@
 #include <pthread.h>
 #include <string.h>
 
-struct cpu_res_arg { unsigned tid; unsigned tc; struct bench_buf *in; float *ret; };
+struct cpu_res_arg {
+	unsigned tid;
+	unsigned tc;
+
+	struct bench_buf *in;
+	float *ret;
+};
 
 static void *cpu_result_matrix_mt(void *v_arg)
 {
@@ -25,7 +31,9 @@ static void *cpu_result_matrix_mt(void *v_arg)
 		float a = arg->in->a[i], b = arg->in->b[i], c = arg->in->c[i];
 
 		for (unsigned j = 0; j < round_cnt; j++) {
-			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
+			lres += a * ((b * c) + b);
+			lres += b * ((c * a) + c);
+			lres += c * ((a * b) + a);
 		}
 
 		arg->ret[i] = lres;
@@ -51,7 +59,8 @@ static float *cpu_result_matrix(struct bench_buf *in)
 	pthread_t cpu_res_t[tc];
 
 	for (unsigned i = 0; i < tc; i++)
-		pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void *)&targ[i]);
+		pthread_create(&cpu_res_t[i], NULL,
+			       cpu_result_matrix_mt, (void *)&targ[i]);
 
 	for (unsigned i = 0; i < tc; i++)
 		pthread_join(cpu_res_t[i], NULL);
