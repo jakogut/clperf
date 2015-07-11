@@ -19,12 +19,12 @@ static void *cpu_result_matrix_mt(void *v_arg)
 
 	float lres;
 
-	for(unsigned i = work_start; i < work_end; i++) {
+	for (unsigned i = work_start; i < work_end; i++) {
 
 		lres = 0;
 		float a = arg->in->a[i], b = arg->in->b[i], c = arg->in->c[i];
 
-		for(unsigned j = 0; j < round_cnt; j++) {
+		for (unsigned j = 0; j < round_cnt; j++) {
 			lres += a * ((b * c) + b); lres += b * ((c * a) + c); lres += c * ((a * b) + a);
 		}
 
@@ -41,7 +41,7 @@ static float *cpu_result_matrix(struct bench_buf *in)
 
 	float *res = aligned_alloc(16, BUFFER_SIZE * sizeof(float));
 
-	for(unsigned i = 0; i < tc; i++) {
+	for (unsigned i = 0; i < tc; i++) {
 		targ[i].tid = i;
 		targ[i].tc = tc;
 		targ[i].in = in;
@@ -50,8 +50,11 @@ static float *cpu_result_matrix(struct bench_buf *in)
 
 	pthread_t cpu_res_t[tc];
 
-	for(unsigned i = 0; i < tc; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void *)&targ[i]);
-	for(unsigned i = 0; i < tc; i++) pthread_join(cpu_res_t[i], NULL);
+	for (unsigned i = 0; i < tc; i++)
+		pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void *)&targ[i]);
+
+	for (unsigned i = 0; i < tc; i++)
+		pthread_join(cpu_res_t[i], NULL);
 
 	return (float*)res;
 }
@@ -64,7 +67,9 @@ double cpu_bench(struct bench_buf *in, float *result)
 	float* mat = cpu_result_matrix(in);
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	if(result != NULL) memcpy(result, mat, sizeof(float) * BUFFER_SIZE);
+	if (result != NULL)
+		memcpy(result, mat, sizeof(float) * BUFFER_SIZE);
+
 	free(mat);
 
 	return timespec_to_nsec(&start, &end) / 1000000000.0f;
