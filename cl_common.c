@@ -19,7 +19,7 @@ void destroy_cl_state(struct cl_state *cl)
 		free(cl->platforms);
 }
 
-static cl_uint get_plat_cnt()
+static cl_uint get_plat_cnt(void)
 {
 	cl_uint plat_cnt;
 
