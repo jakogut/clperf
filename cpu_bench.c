@@ -34,12 +34,12 @@ static void *cpu_result_matrix_mt(void *v_arg)
 	return NULL;
 }
 
-static float* cpu_result_matrix(struct bench_buf *in)
+static float *cpu_result_matrix(struct bench_buf *in)
 {
 	const unsigned tc = nthreads();
 	struct cpu_res_arg targ[tc];
 
-	float* res = aligned_alloc(16, BUFFER_SIZE * sizeof(float));
+	float *res = aligned_alloc(16, BUFFER_SIZE * sizeof(float));
 
 	for(unsigned i = 0; i < tc; i++) {
 		targ[i].tid = i;
@@ -50,7 +50,7 @@ static float* cpu_result_matrix(struct bench_buf *in)
 
 	pthread_t cpu_res_t[tc];
 
-	for(unsigned i = 0; i < tc; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void*)&targ[i]);
+	for(unsigned i = 0; i < tc; i++) pthread_create(&cpu_res_t[i], NULL, cpu_result_matrix_mt, (void *)&targ[i]);
 	for(unsigned i = 0; i < tc; i++) pthread_join(cpu_res_t[i], NULL);
 
 	return (float*)res;
