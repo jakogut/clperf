@@ -56,7 +56,7 @@ static float *cpu_result_matrix(struct bench_buf *in)
 	for (unsigned i = 0; i < tc; i++)
 		pthread_join(cpu_res_t[i], NULL);
 
-	return (float*)res;
+	return res;
 }
 
 double cpu_bench(struct bench_buf *in, float *result)
@@ -64,7 +64,7 @@ double cpu_bench(struct bench_buf *in, float *result)
 	struct timespec start, end;
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	float* mat = cpu_result_matrix(in);
+	float *mat = cpu_result_matrix(in);
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
 	if (result != NULL)
