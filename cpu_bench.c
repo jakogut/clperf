@@ -62,9 +62,10 @@ static float *cpu_result_matrix(struct bench_buf *in)
 double cpu_bench(struct bench_buf *in, float *result)
 {
 	struct timespec start, end;
+	float *mat;
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	float *mat = cpu_result_matrix(in);
+	mat = cpu_result_matrix(in);
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
 	if (result != NULL)
