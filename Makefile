@@ -1,9 +1,9 @@
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -std=gnu11 -Wall -Wextra -Werror -pedantic -pipe -march=native -g
+CFLAGS = -std=gnu11 -Wall -Wextra -Werror -pedantic -pipe -march=native -g -fopenmp -static
 OFLAGS =
-LFLAGS = -lm -lc -lOpenCL -lpthread
+LFLAGS = -lm -lc -lOpenCL -lpthread -fopenmp
 
 OPTIMIZATION = -Ofast
 

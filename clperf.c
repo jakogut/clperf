@@ -37,17 +37,17 @@ int main(void)
 
 	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		a_d[i] = clCreateBuffer(cl.context,
-					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+					CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
 					BUFFER_SIZE * sizeof(float),
 					input.a, &cl.error);
 
 		b_d[i] = clCreateBuffer(cl.context,
-					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+					CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
 					BUFFER_SIZE * sizeof(float),
 					input.b, &cl.error);
 
 		c_d[i] = clCreateBuffer(cl.context,
-					CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+					CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
 					BUFFER_SIZE * sizeof(float),
 					input.c, &cl.error);
 
