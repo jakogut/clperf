@@ -4,7 +4,7 @@
 #define BUFFER_SIZE (2 << 22)
 #define ROUNDS_PER_ITERATION 512
 
-#define FLOPS_PER_ROUND (4 * 3 * 4)
+#define FLOPS_PER_ROUND (4 * 3 + 3)
 #define FLOPS_PER_ITERATION (ROUNDS_PER_ITERATION * FLOPS_PER_ROUND)
 
 #include <time.h>

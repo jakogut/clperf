@@ -13,21 +13,23 @@ static float *cpu_result_matrix(struct bench_buf *in)
 		float a = in->a[i], b = in->b[i], c = in->c[i];
 
 		for (unsigned j = 0; j < ROUNDS_PER_ITERATION; j++) {
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			b += a * ((b * c) + b);
+			c += b * ((c * a) + c);
+			a += c * ((a * b) + a);
 
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			b += a * ((b * c) + b);
+			c += b * ((c * a) + c);
+			a += c * ((a * b) + a);
 
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			b += a * ((b * c) + b);
+			c += b * ((c * a) + c);
+			a += c * ((a * b) + a);
 
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			b += a * ((b * c) + b);
+			c += b * ((c * a) + c);
+			a += c * ((a * b) + a);
+
+			res[i] += a + b + c;
 		}
 	}
 

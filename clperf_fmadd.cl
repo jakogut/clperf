@@ -10,10 +10,23 @@ __kernel void matrix_fmadd (__global const float* a,
 
 		#pragma unroll
 		for(int i = 0; i < 512; i++) {
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
-			r += al * ((bl * cl) + bl); r += bl * ((cl * al) + cl); r += cl * ((al * bl) + al);
+			bl += al * ((bl * cl) + bl);
+			cl += bl * ((cl * al) + cl);
+			al += cl * ((al * bl) + al);
+
+			bl += al * ((bl * cl) + bl);
+			cl += bl * ((cl * al) + cl);
+			al += cl * ((al * bl) + al);
+
+			bl += al * ((bl * cl) + bl);
+			cl += bl * ((cl * al) + cl);
+			al += cl * ((al * bl) + al);
+
+			bl += al * ((bl * cl) + bl);
+			cl += bl * ((cl * al) + cl);
+			al += cl * ((al * bl) + al);
+
+			r += a + b + c;
 		}
 
 		res[i] = r;
