@@ -10,24 +10,31 @@ static float *cpu_result_matrix(struct bench_buf *in)
 
 	#pragma omp parallel for
 	for (unsigned i = 0; i < BUFFER_SIZE; i++) {
-		float a = in->a[i], b = in->b[i], c = in->c[i];
+		float aa = in->a[i], ba = in->b[i], ca = in->c[i],
+		      ab = in->a[i], bb = in->b[i], cb = in->c[i],
+		      ac = in->a[i], bc = in->b[i], cc = in->c[i],
+		      ad = in->a[i], bd = in->b[i], cd = in->c[i];
 
 		for (unsigned j = 0; j < ROUNDS_PER_ITERATION; j++) {
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			ba += aa * ((ba * ca) + ba);
+			bb += ab * ((bb * cb) + bb);
+			bc += ac * ((bc * cc) + bc);
+			bd += ad * ((bd * cd) + bd);
 
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			ca += ba * ((ca * aa) + ca);
+			cb += bb * ((cb * ab) + cb);
+			cc += bc * ((cc * ac) + cc);
+			cd += bd * ((cd * ad) + cd);
 
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			aa += ca * ((aa * ba) + aa);
+			ab += cb * ((ab * bb) + ab);
+			ac += cc * ((ac * bc) + ac);
+			ad += cd * ((ad * bd) + ad);
 
-			res[i] += a * ((b * c) + b);
-			res[i] += b * ((c * a) + c);
-			res[i] += c * ((a * b) + a);
+			res[i] += aa * ab + ac * ad;
+			res[i] += aa * ab + ac * ad;
+			res[i] += aa * ab + ac * ad;
+			res[i] += aa * ab + ac * ad;
 		}
 	}
 
