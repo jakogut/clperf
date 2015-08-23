@@ -96,7 +96,7 @@ int main(void)
 		cl.error = clEnqueueNDRangeKernel(cl.queues[i],
 						  cl.kernels[i],
 						  1,
-						  NULL,
+						  0,
 						  &global_ws,
 						  &local_ws,
 						  0,
@@ -112,13 +112,16 @@ int main(void)
 	for (unsigned i = 0; i < cl.dev_cnt; i++) {
 		clWaitForEvents(1, &cl.events[i]);
 
-		cl_ulong time_start, time_end;
+		cl_ulong time_start = 0, time_end = 0;
 
-		clGetEventProfilingInfo(cl.events[i],
+		clFinish(cl.queues[i]);
+		cl.error = clWaitForEvents(1, &cl.events[i]);
+
+		cl.error = clGetEventProfilingInfo(cl.events[i],
 					CL_PROFILING_COMMAND_START,
 					sizeof(cl_ulong), &time_start, NULL);
 
-		clGetEventProfilingInfo(cl.events[i],
+		cl.error = clGetEventProfilingInfo(cl.events[i],
 					CL_PROFILING_COMMAND_END,
 					sizeof(cl_ulong), &time_end, NULL);
 
